@@ -7,6 +7,18 @@
 //
 
 #import "MyScene.h"
+#define ARC4RANDOM_MAX 0x10000000
+
+static inline CGFloat ScalarRandomRange(CGFloat min, CGFloat max){
+    return floorf(((double)arc4random()/ARC4RANDOM_MAX)*(max-min)+min);
+}
+
+NSTimeInterval _dt;
+NSTimeInterval _lastUpdateTime;
+CGVector _windForce;
+BOOL _blowing;
+NSTimeInterval _timeUntilSwitchWindDirection;
+
 
 @implementation MyScene
 {
@@ -41,6 +53,7 @@
         //2
         CGPathMoveToPoint(trianglePath,nil, -_triangle.size.width/2, -_triangle.size.height/2);
         //3
+        CGPathAddLineToPoint(trianglePath, nil, _triangle.size.width/2, -_triangle.size.height/2);
         CGPathAddLineToPoint(trianglePath, nil, 0, _triangle.size.height/2);
         CGPathAddLineToPoint(trianglePath, nil, -_triangle.size.width/2, -_triangle.size.height/2);
         //4
@@ -83,4 +96,28 @@
       [SKAction sequence:@[shake, [shake reversedAction]]]
                       count:5]];
 }
+
+
+-(void)update:(NSTimeInterval)currentTime{
+    //1
+    if (_lastUpdateTime){
+        _dt = currentTime-_lastUpdateTime;
+    }else{
+        _dt=0;
+    }
+    _lastUpdateTime=currentTime;
+
+    //2
+    _timeUntilSwitchWindDirection -=_dt;
+    if(_timeUntilSwitchWindDirection<=0){
+        _timeUntilSwitchWindDirection =ScalarRandomRange(1, 5);
+        _windForce=CGVectorMake(0, 0);//3-replace me!
+        NSLog(@"Wind force:%0.2f, %0.2f", _windForce.dx,_windForce.dy);
+    }
+    //4 do something here;
+}
+
+
+
+
 @end
